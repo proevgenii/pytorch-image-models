@@ -205,8 +205,8 @@ class CustomDataset(Dataset):
         return len(self.dataframe)
 
     def __getitem__(self, index):
-        img_path = self.dataframe.iloc[index]['top_tiles_path']
-        label = self.dataframe.iloc[index]['label']
+        img_path = self.dataframe.iloc[index]['image_path']
+        label = self.dataframe.iloc[index]['label_ohe']
 
         # Load image
         image = Image.open(img_path).convert('RGB')
