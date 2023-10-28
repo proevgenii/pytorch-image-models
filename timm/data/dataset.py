@@ -16,6 +16,8 @@ _logger = logging.getLogger(__name__)
 
 
 _ERROR_RETRY = 50
+from torch.utils.data import Dataset
+from PIL import Image
 
 
 class ImageDataset(data.Dataset):
@@ -188,3 +190,27 @@ class AugMixDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.dataset)
+
+
+
+
+class CustomDataset(Dataset):
+    def __init__(self, dataframe, transform=None):
+        if transform:
+            print(f'TRANSFORM:{transform}')
+        self.dataframe = dataframe
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.dataframe)
+
+    def __getitem__(self, index):
+        img_path = self.dataframe.iloc[index]['top_tiles_path']
+        label = self.dataframe.iloc[index]['label']
+
+        # Load image
+        image = Image.open(img_path).convert('RGB')
+        if self.transform:
+            image = self.transform(image)
+
+        return image, label

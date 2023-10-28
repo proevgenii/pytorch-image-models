@@ -26,7 +26,7 @@ try:
 except ImportError:
     has_imagenet = False
 
-from .dataset import IterableImageDataset, ImageDataset
+from .dataset import IterableImageDataset, ImageDataset, CustomDataset
 
 _TORCH_BASIC_DS = dict(
     cifar10=CIFAR10,
@@ -71,6 +71,7 @@ def create_dataset(
         batch_size=None,
         seed=42,
         repeats=0,
+        dataframe=None,
         **kwargs
 ):
     """ Dataset factory method
@@ -103,7 +104,10 @@ def create_dataset(
         Dataset object
     """
     name = name.lower()
-    if name.startswith('torch/'):
+    if name == 'custom_dataset':
+        print('USING CUSTOM DATASET')
+        ds = CustomDataset(dataframe, **kwargs)
+    elif name.startswith('torch/'):
         name = name.split('/', 2)[-1]
         torch_kwargs = dict(root=root, download=download, **kwargs)
         if name in _TORCH_BASIC_DS:

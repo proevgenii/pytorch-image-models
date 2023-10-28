@@ -65,6 +65,8 @@ try:
 except ImportError as e:
     has_functorch = False
 
+import pandas as pd
+
 has_compile = hasattr(torch, 'compile')
 
 
@@ -578,6 +580,10 @@ def main():
     # create the train and eval datasets
     if args.data and not args.data_dir:
         args.data_dir = args.data
+    _logger.info('DATASET TYPE:{args.dataset}')
+    if args.dataset=='custom_dataset':
+        train_dataframe = pd.read_csv(args.train_df)
+        test_dataframe = pd.read_csv(args.test_df)
     dataset_train = create_dataset(
         args.dataset,
         root=args.data_dir,
@@ -588,6 +594,7 @@ def main():
         batch_size=args.batch_size,
         seed=args.seed,
         repeats=args.epoch_repeats,
+        dataframe=train_dataframe,
     )
 
     dataset_eval = create_dataset(
@@ -598,6 +605,7 @@ def main():
         class_map=args.class_map,
         download=args.dataset_download,
         batch_size=args.batch_size,
+        dataframe=test_dataframe,
     )
 
     # setup mixup / cutmix
