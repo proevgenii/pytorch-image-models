@@ -129,5 +129,6 @@ workers: 8
 weighted: True
 num_classes: 7
 train_df: 'train_dataframe.csv'
-test_df: 'test_dataframe.csv'
+test_df: 'train_dataframe.csv'
+#'test_dataframe.csv'
 data_path: '/raid/eprosvirin/ubc_ocean/data/'
