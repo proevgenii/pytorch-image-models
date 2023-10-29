@@ -82,7 +82,7 @@ momentum: 0.9
 native_amp: false
 no_aug: false
 no_ddp_bb: false
-no_prefetcher: false
+no_prefetcher: True
 no_resume_opt: false
 opt: adamw
 opt_betas: null
