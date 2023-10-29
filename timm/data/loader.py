@@ -115,6 +115,36 @@ class PrefetchLoader:
             self.random_erasing = None
         self.is_cuda = torch.cuda.is_available() and device.type == 'cuda'
 
+    # def __iter__(self):
+    #     first = True
+    #     if self.is_cuda:
+    #         stream = torch.cuda.Stream()
+    #         stream_context = partial(torch.cuda.stream, stream=stream)
+    #     else:
+    #         stream = None
+    #         stream_context = suppress
+    #
+    #     for next_input, next_target in self.loader:
+    #
+    #         with stream_context():
+    #             next_input = next_input.to(device=self.device, non_blocking=True)
+    #             next_target = next_target.to(device=self.device, non_blocking=True)
+    #             next_input = next_input.to(self.img_dtype).sub_(self.mean).div_(self.std)
+    #             if self.random_erasing is not None:
+    #                 next_input = self.random_erasing(next_input)
+    #
+    #         if not first:
+    #             yield input, target
+    #         else:
+    #             first = False
+    #
+    #         if stream is not None:
+    #             torch.cuda.current_stream().wait_stream(stream)
+    #
+    #         input = next_input
+    #         target = next_target
+    #
+    #     yield input, target
     def __iter__(self):
         first = True
         if self.is_cuda:
@@ -133,18 +163,17 @@ class PrefetchLoader:
                 if self.random_erasing is not None:
                     next_input = self.random_erasing(next_input)
 
+            if stream is not None:
+                torch.cuda.current_stream().wait_stream(stream)
+
+            input, target = next_input, next_target  # Move this line up
+
             if not first:
                 yield input, target
             else:
                 first = False
 
-            if stream is not None:
-                torch.cuda.current_stream().wait_stream(stream)
-
-            input = next_input
-            target = next_target
-
-        yield input, target
+        yield input, target  # Restore the last yield
 
     def __len__(self):
         return len(self.loader)
