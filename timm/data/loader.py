@@ -173,7 +173,8 @@ class PrefetchLoader:
             else:
                 first = False
 
-        yield input, target  # Restore the last yield
+        if not first:  # Check if the loop has executed at least once before yielding the last batch
+            yield input, target  # Restore the last yield
 
     def __len__(self):
         return len(self.loader)
