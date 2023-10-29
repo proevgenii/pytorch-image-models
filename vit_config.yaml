@@ -45,7 +45,7 @@ grad_checkpointing: False
 hflip: 0.5
 img_size: null
 in_chans: null
-initial_checkpoint: '/mnt/sdb1/home/proevgenii/checkpoints/20230718-045711-vit_base_patch32_clip_224_laion2b-224/model_best.pth.tar'
+initial_checkpoint: #'/mnt/sdb1/home/proevgenii/checkpoints/20230718-045711-vit_base_patch32_clip_224_laion2b-224/model_best.pth.tar'
 #'/workspace/img_clf/pytorhc-image-models/output/train/20230627-154704-vit_bert_model-224/model_best.pth.tar'
 #'/workspace/img_clf/pytorhc-image-models/output/train/20230624-055546-vit_bert_model-224/model_best.pth.tar'
 input_size: null
