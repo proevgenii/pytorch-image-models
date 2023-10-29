@@ -29,6 +29,9 @@ import torchvision.utils
 import yaml
 from torch.nn.parallel import DistributedDataParallel as NativeDDP
 
+from torchmetrics.classification import MultilabelF1Score, F1Score, AUROC, BinaryF1Score
+from sklearn.metrics import balanced_accuracy_score
+
 from timm import utils
 from timm.data import create_dataset, create_loader, resolve_data_config, Mixup, FastCollateMixup, AugMixDataset
 from timm.layers import convert_splitbn_model, convert_sync_batchnorm, set_fast_norm
@@ -870,11 +873,20 @@ def train_one_epoch(
         elif mixup_fn is not None:
             mixup_fn.mixup_enabled = False
 
+    if args.num_classes > 1:
+        f1 = MultilabelF1Score(num_labels=args.num_classes).to(device)
+    else:
+        f1 = BinaryF1Score(task='binary').to(device)
+        auroc = AUROC(task="binary").to(device)
+
     second_order = hasattr(optimizer, 'is_second_order') and optimizer.is_second_order
     has_no_sync = hasattr(model, "no_sync")
     update_time_m = utils.AverageMeter()
     data_time_m = utils.AverageMeter()
     losses_m = utils.AverageMeter()
+
+    f1_m = utils.AverageMeter()
+    bac_m = utils.AverageMeter()
 
     model.train()
 
@@ -947,6 +959,12 @@ def train_one_epoch(
             losses_m.update(loss.item() * accum_steps, input.size(0))
         update_sample_count += input.size(0)
 
+        ### CALC SCORE
+        f1_score = f1(output, target).to(args.device)
+        bac_score = balanced_accuracy_score(y_true=target.detach.cpu(), y_pred=output.detach.cpu())
+        f1_m.update(f1_score.item(), input.size(0))
+        bac_m.update(bac_score, input.size(0))
+
         if not need_update:
             data_start_time = time.time()
             continue
@@ -976,6 +994,8 @@ def train_one_epoch(
                     f'Train: {epoch} [{update_idx:>4d}/{updates_per_epoch} '
                     f'({100. * update_idx / (updates_per_epoch - 1):>3.0f}%)]  '
                     f'Loss: {losses_m.val:#.3g} ({losses_m.avg:#.3g})  '
+                    f'F1_score: {f1_m.val:#.3g} ({f1_m.avg:#.3g})'
+                    f'BAC_score: {bac_m.val:#.3g} ({bac_m.avg:#.3g})'
                     f'Time: {update_time_m.val:.3f}s, {update_sample_count / update_time_m.val:>7.2f}/s  '
                     f'({update_time_m.avg:.3f}s, {update_sample_count / update_time_m.avg:>7.2f}/s)  '
                     f'LR: {lr:.3e}  '
@@ -1004,7 +1024,10 @@ def train_one_epoch(
     if hasattr(optimizer, 'sync_lookahead'):
         optimizer.sync_lookahead()
 
-    return OrderedDict([('loss', losses_m.avg)])
+    return OrderedDict([('loss', losses_m.avg),
+                        ('F1', f1_m.avg),
+                        ('BAC', bac_m.avg)
+                        ])
 
 
 def validate(
@@ -1016,10 +1039,19 @@ def validate(
         amp_autocast=suppress,
         log_suffix=''
 ):
+    if args.num_classes > 1:
+        f1 = MultilabelF1Score(num_labels=args.num_classes).to(device)
+    else:
+        f1 = BinaryF1Score(task='binary').to(device)
+        auroc = AUROC(task="binary").to(device)
+
     batch_time_m = utils.AverageMeter()
     losses_m = utils.AverageMeter()
     top1_m = utils.AverageMeter()
     top5_m = utils.AverageMeter()
+
+    f1_m = utils.AverageMeter()
+    bac_m = utils.AverageMeter()
 
     model.eval()
 
@@ -1046,12 +1078,17 @@ def validate(
                     target = target[0:target.size(0):reduce_factor]
 
                 loss = loss_fn(output, target)
-            acc1, acc5 = utils.accuracy(output, target, topk=(1, 5))
+            # acc1, acc5 = utils.accuracy(output, target, topk=(1, 5))
+
+            f1_score = f1(output, target).to(device)
+            bac_score = balanced_accuracy_score(y_true=target.detach.cpu(), y_pred=output.detach.cpu())
 
             if args.distributed:
                 reduced_loss = utils.reduce_tensor(loss.data, args.world_size)
-                acc1 = utils.reduce_tensor(acc1, args.world_size)
-                acc5 = utils.reduce_tensor(acc5, args.world_size)
+                # acc1 = utils.reduce_tensor(acc1, args.world_size)
+                # acc5 = utils.reduce_tensor(acc5, args.world_size)
+                f1_score = utils.reduce_tensor(f1_score, args.world_size)
+                bac_score = utils.reduce_tensor(bac_score, args.world_size)
             else:
                 reduced_loss = loss.data
 
@@ -1059,8 +1096,8 @@ def validate(
                 torch.cuda.synchronize()
 
             losses_m.update(reduced_loss.item(), input.size(0))
-            top1_m.update(acc1.item(), output.size(0))
-            top5_m.update(acc5.item(), output.size(0))
+            f1_m.update(f1_score.item(), input.size(0))
+            bac_m.update(bac_score.item(), input.size(0))
 
             batch_time_m.update(time.time() - end)
             end = time.time()
@@ -1070,11 +1107,11 @@ def validate(
                     f'{log_name}: [{batch_idx:>4d}/{last_idx}]  '
                     f'Time: {batch_time_m.val:.3f} ({batch_time_m.avg:.3f})  '
                     f'Loss: {losses_m.val:>7.3f} ({losses_m.avg:>6.3f})  '
-                    f'Acc@1: {top1_m.val:>7.3f} ({top1_m.avg:>7.3f})  '
-                    f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})'
+                    f'F1: {f1_m.val:>7.4f} ({f1_m.avg:>7.4f})'
+                    f'BAC: {bac_m.val:>7.4f} ({bac_m.avg:>7.4f})'
                 )
 
-    metrics = OrderedDict([('loss', losses_m.avg), ('top1', top1_m.avg), ('top5', top5_m.avg)])
+    metrics = OrderedDict([('loss', losses_m.avg), ('F1', f1_m.avg), ('BAC', bac_m.avg)])
 
     return metrics
 
