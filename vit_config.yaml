@@ -87,7 +87,7 @@ no_resume_opt: false
 opt: adamw
 opt_betas: null
 opt_eps: null
-output: '/mnt/sdb1/home/proevgenii/checkpoints'
+output: '/raid/eprosvirin/ubc_ocean/data/'
 patience_epochs: 10
 pin_mem: false
 pretrained: true
@@ -132,3 +132,4 @@ train_df: 'train_dataframe.csv'
 test_df: 'train_dataframe.csv'
 #'test_dataframe.csv'
 data_path: '/raid/eprosvirin/ubc_ocean/data/'
+dataset: 'custom_dataset'
