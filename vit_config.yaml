@@ -128,8 +128,8 @@ worker_seeding: all
 workers: 8
 weighted: True
 num_classes: 7
-train_df: 'train_dataframe.csv'
-test_df: 'train_dataframe.csv'
+train_df: 'train_dataset.csv'
+test_df: 'train_dataset.csv'
 #'test_dataframe.csv'
 data_path: '/raid/eprosvirin/ubc_ocean/data/'
 dataset: 'custom_dataset'
