@@ -198,9 +198,9 @@ class CustomDataset(Dataset):
     def __init__(self, dataframe, transform=None):
         if transform:
             print(f'TRANSFORM:{transform}')
-        dataframe['label_ohe'] = dataframe['label_ohe'].apply(lambda x: eval(x))  #TODO: change this shit
+        #dataframe['label_ohe'] = dataframe['label_ohe'].apply(lambda x: eval(x))  #TODO: change this shit
         self.img_paths = dataframe['image_path'].values
-        self.labels = np.stack(dataframe['label_ohe'].values)
+        self.labels = dataframe['label_ohe'].values
         self.transform = transform
 
     def __len__(self):
