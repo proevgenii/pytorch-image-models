@@ -5,7 +5,7 @@ Hacked together by / Copyright 2019, Ross Wightman
 import io
 import logging
 from typing import Optional
-
+import numpy as np
 import torch
 import torch.utils.data as data
 from PIL import Image
@@ -198,15 +198,17 @@ class CustomDataset(Dataset):
     def __init__(self, dataframe, transform=None):
         if transform:
             print(f'TRANSFORM:{transform}')
-        self.dataframe = dataframe
+        dataframe['label_ohe'] = dataframe['label_ohe'].apply(lambda x: eval(x))  #TODO: change this shit
+        self.img_paths = dataframe['image_path'].values
+        self.labels = np.stack(dataframe['label_ohe'].values)
         self.transform = transform
 
     def __len__(self):
-        return len(self.dataframe)
+        return len(self.labels)
 
     def __getitem__(self, index):
-        img_path = self.dataframe.iloc[index]['image_path']
-        label = self.dataframe.iloc[index]['label_ohe']
+        img_path = self.img_paths[index]
+        label = self.labels[index]
 
         # Load image
         image = Image.open(img_path).convert('RGB')
