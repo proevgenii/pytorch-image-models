@@ -1088,7 +1088,7 @@ def validate(
                 # acc1 = utils.reduce_tensor(acc1, args.world_size)
                 # acc5 = utils.reduce_tensor(acc5, args.world_size)
                 f1_score = utils.reduce_tensor(f1_score, args.world_size)
-                bac_score = utils.reduce_tensor(bac_score, args.world_size)
+                bac_score /= int(args.world_size)#utils.reduce_tensor(bac_score, args.world_size)
             else:
                 reduced_loss = loss.data
 
@@ -1097,7 +1097,7 @@ def validate(
 
             losses_m.update(reduced_loss.item(), input.size(0))
             f1_m.update(f1_score.item(), input.size(0))
-            bac_m.update(bac_score.item(), input.size(0))
+            bac_m.update(bac_score, input.size(0))
 
             batch_time_m.update(time.time() - end)
             end = time.time()
