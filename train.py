@@ -920,7 +920,7 @@ def train_one_epoch(
         def _forward():
             with amp_autocast():
                 output = model(input)
-                loss = loss_fn(output, target)
+                loss = loss_fn(output, target.long())
             if accum_steps > 1:
                 loss /= accum_steps
             return loss
@@ -1077,7 +1077,7 @@ def validate(
                     output = output.unfold(0, reduce_factor, reduce_factor).mean(dim=2)
                     target = target[0:target.size(0):reduce_factor]
 
-                loss = loss_fn(output, target)
+                loss = loss_fn(output, target.long())
             # acc1, acc5 = utils.accuracy(output, target, topk=(1, 5))
 
             f1_score = f1(output, target).to(device)
