@@ -29,7 +29,7 @@ import torchvision.utils
 import yaml
 from torch.nn.parallel import DistributedDataParallel as NativeDDP
 
-from torchmetrics.classification import MultilabelF1Score, F1Score, AUROC, BinaryF1Score
+from torchmetrics.classification import MultilabelF1Score, F1Score, AUROC, BinaryF1Score, MulticlassF1Score
 from sklearn.metrics import balanced_accuracy_score
 
 from timm import utils
@@ -874,7 +874,7 @@ def train_one_epoch(
             mixup_fn.mixup_enabled = False
 
     if args.num_classes > 1:
-        f1 = MultilabelF1Score(num_labels=args.num_classes).to(device)
+        f1 = MulticlassF1Score(num_classes=args.num_classes).to(device)
     else:
         f1 = F1Score(task="multiclass", num_classes=5).to(device)
         auroc = AUROC(task="binary").to(device)
@@ -1040,7 +1040,7 @@ def validate(
         log_suffix=''
 ):
     if args.num_classes > 1:
-        f1 = MultilabelF1Score(num_labels=args.num_classes).to(device)
+        f1 = MulticlassF1Score(num_classes=args.num_classes).to(device)
     else:
         f1 = F1Score(task="multiclass", num_classes=5).to(device)
         auroc = AUROC(task="binary").to(device)
