@@ -960,8 +960,8 @@ def train_one_epoch(
         update_sample_count += input.size(0)
 
         ### CALC SCORE
-        f1_score = f1(output, target).to(args.device)
-        bac_score = balanced_accuracy_score(y_true=target.detach.cpu(), y_pred=output.detach.cpu())
+        f1_score = f1(output.argmax(-1), target).to(args.device)
+        bac_score = balanced_accuracy_score(y_true=target.detach.cpu(), y_pred=output.argmax(-1).detach.cpu())
         f1_m.update(f1_score.item(), input.size(0))
         bac_m.update(bac_score, input.size(0))
 
@@ -1080,8 +1080,8 @@ def validate(
                 loss = loss_fn(output, target.long())
             # acc1, acc5 = utils.accuracy(output, target, topk=(1, 5))
 
-            f1_score = f1(output, target).to(device)
-            bac_score = balanced_accuracy_score(y_true=target.detach.cpu(), y_pred=output.detach.cpu())
+            f1_score = f1(output.argmax(-1), target).to(device)
+            bac_score = balanced_accuracy_score(y_true=target.detach.cpu(), y_pred=output.argmax(-1).detach.cpu())
 
             if args.distributed:
                 reduced_loss = utils.reduce_tensor(loss.data, args.world_size)
