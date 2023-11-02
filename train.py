@@ -876,7 +876,7 @@ def train_one_epoch(
     if args.num_classes > 1:
         f1 = MultilabelF1Score(num_labels=args.num_classes).to(device)
     else:
-        f1 = BinaryF1Score().to(device)
+        f1 = F1Score(task="multiclass", num_classes=5).to(device)
         auroc = AUROC(task="binary").to(device)
 
     second_order = hasattr(optimizer, 'is_second_order') and optimizer.is_second_order
@@ -1042,7 +1042,7 @@ def validate(
     if args.num_classes > 1:
         f1 = MultilabelF1Score(num_labels=args.num_classes).to(device)
     else:
-        f1 = BinaryF1Score().to(device)
+        f1 = F1Score(task="multiclass", num_classes=5).to(device)
         auroc = AUROC(task="binary").to(device)
 
     batch_time_m = utils.AverageMeter()
