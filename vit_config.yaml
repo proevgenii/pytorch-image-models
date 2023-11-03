@@ -6,7 +6,7 @@ aot_autograd: false
 apex_amp: false
 aug_repeats: 0
 aug_splits: 0
-batch_size: 16
+batch_size: 512
 bce_loss: false
 bce_target_thresh: null
 bn_eps: null
@@ -107,7 +107,7 @@ scale:
 sched: cosine
 sched_on_updates: false
 seed: 42
-smoothing: 0#0.1
+smoothing: 0 #0.1
 split_bn: false
 start_epoch: null
 std: null
