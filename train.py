@@ -585,8 +585,8 @@ def main():
         args.data_dir = args.data
     _logger.info('DATASET TYPE:{args.dataset}')
     if args.dataset=='custom_dataset':
-        test_dataframe = train_dataframe = pd.read_csv(args.data_path + args.train_df)
-        #test_dataframe = pd.read_csv(args.data_path + args.test_df)
+        train_dataframe = pd.read_csv(args.data_path + args.train_df)
+        test_dataframe = pd.read_csv(args.data_path + args.test_df)
     dataset_train = create_dataset(
         args.dataset,
         root=args.data_dir,
@@ -690,7 +690,6 @@ def main():
         pin_memory=args.pin_mem,
         device=device,
     )
-    loader_eval = loader_train
     # setup loss function
     if args.jsd_loss:
         assert num_aug_splits > 1  # JSD only valid with aug splits set
@@ -776,8 +775,8 @@ def main():
             f'Scheduled epochs: {num_epochs}. LR stepped per {"epoch" if lr_scheduler.t_in_epochs else "update"}.')
 
     try:
-        _logger.info('Starting training')
-        _logger.info(f'{start_epoch=},{num_epochs=}')
+        # _logger.info('Starting training')
+        # _logger.info(f'{start_epoch=},{num_epochs=}')
         for epoch in range(start_epoch, num_epochs):
             if hasattr(dataset_train, 'set_epoch'):
                 dataset_train.set_epoch(epoch)
@@ -965,11 +964,11 @@ def train_one_epoch(
         update_sample_count += input.size(0)
 
         ### CALC SCORE
-        _logger.info("CALC SCORE")
-        _logger.info(f'{output.shape=}, {target.shape=}')
-        _logger.info(f'{output.argmax(-1).shape=}')
-        _logger.info(f'{output.argmax(-1)=}')
-        _logger.info(f'{target=}')
+        # _logger.info("CALC SCORE")
+        # _logger.info(f'{output.shape=}, {target.shape=}')
+        # _logger.info(f'{output.argmax(-1).shape=}')
+        # _logger.info(f'{output.argmax(-1)=}')
+        # _logger.info(f'{target=}')
         f1_score = f1(output.argmax(-1), target).to(args.device)
         bac_score = balanced_accuracy_score(y_true=target.detach().cpu(), y_pred=output.argmax(-1).detach().cpu())
         f1_m.update(f1_score.item(), input.size(0))
