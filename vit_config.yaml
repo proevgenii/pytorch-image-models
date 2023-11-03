@@ -6,7 +6,7 @@ aot_autograd: false
 apex_amp: false
 aug_repeats: 0
 aug_splits: 0
-batch_size: 256
+batch_size: 16
 bce_loss: false
 bce_target_thresh: null
 bn_eps: null
@@ -35,7 +35,7 @@ drop_block: null
 drop_connect: null
 drop_path: 0.1
 epoch_repeats: 0.0
-epochs: 15
+epochs: 100
 eval_metric: F1
 experiment: ''
 fast_norm: false
@@ -45,7 +45,8 @@ grad_checkpointing: False
 hflip: 0.5
 img_size: null
 in_chans: null
-initial_checkpoint: #'/mnt/sdb1/home/proevgenii/checkpoints/20230718-045711-vit_base_patch32_clip_224_laion2b-224/model_best.pth.tar'
+initial_checkpoint: null
+#'/mnt/sdb1/home/proevgenii/checkpoints/20230718-045711-vit_base_patch32_clip_224_laion2b-224/model_best.pth.tar'
 #'/workspace/img_clf/pytorhc-image-models/output/train/20230627-154704-vit_bert_model-224/model_best.pth.tar'
 #'/workspace/img_clf/pytorhc-image-models/output/train/20230624-055546-vit_bert_model-224/model_best.pth.tar'
 input_size: null
@@ -55,8 +56,7 @@ layer_decay: 0.65
 local_rank: 0
 log_interval: 1
 log_wandb: true
-lr: 1e-4
-#3e-4
+lr: 3e-4
 lr_base: 0.1
 lr_base_scale: ''
 lr_base_size: 256
@@ -68,7 +68,7 @@ lr_noise: null
 lr_noise_pct: 0.67
 lr_noise_std: 1.0
 mean: null
-min_lr: 5e-07
+min_lr: 1e-04
 mixup: 0.0
 mixup_mode: batch
 mixup_off_epoch: 0
@@ -107,7 +107,7 @@ scale:
 sched: cosine
 sched_on_updates: false
 seed: 42
-smoothing: 0.1
+smoothing: 0#0.1
 split_bn: false
 start_epoch: null
 std: null
@@ -127,9 +127,8 @@ weight_decay: 0.05
 worker_seeding: all
 workers: 8
 weighted: True
-num_classes: 7
+num_classes: 5
 train_df: 'train_dataset.csv'
-test_df: 'train_dataset.csv'
-#'test_dataframe.csv'
+test_df: 'test_dataset.csv'
 data_path: '/raid/eprosvirin/ubc_ocean/data/'
 dataset: 'custom_dataset'
