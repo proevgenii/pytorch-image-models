@@ -585,7 +585,7 @@ def main():
         args.data_dir = args.data
     _logger.info('DATASET TYPE:{args.dataset}')
     if args.dataset=='custom_dataset':
-        test_dataframe = train_dataframe = pd.read_csv(args.data_path + args.train_df).sample(16)
+        test_dataframe = train_dataframe = pd.read_csv(args.data_path + args.train_df).sample(17)
         #test_dataframe = pd.read_csv(args.data_path + args.test_df)
     dataset_train = create_dataset(
         args.dataset,
