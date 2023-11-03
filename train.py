@@ -904,7 +904,7 @@ def train_one_epoch(
     optimizer.zero_grad()
     update_sample_count = 0
     for batch_idx, (input, target) in enumerate(loader):
-        _logger.info(f'{input.shape=}, {target.shape=}')
+        # _logger.info(f'{input.shape=}, {target.shape=}')
         last_batch = batch_idx == last_batch_idx
         need_update = last_batch or (batch_idx + 1) % accum_steps == 0
         update_idx = batch_idx // accum_steps
