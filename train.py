@@ -757,6 +757,8 @@ def main():
         **scheduler_kwargs(args),
         updates_per_epoch=updates_per_epoch,
     )
+    print(f'{len(loader_train)=}')
+    print(f'{len(loader_eval)=}')
     start_epoch = 0
     if args.start_epoch is not None:
         # a specified start_epoch will always override the resume epoch
@@ -774,12 +776,14 @@ def main():
             f'Scheduled epochs: {num_epochs}. LR stepped per {"epoch" if lr_scheduler.t_in_epochs else "update"}.')
 
     try:
+        print('Starting training')
+        print(f'{start_epoch=},{num_epochs=}')
         for epoch in range(start_epoch, num_epochs):
             if hasattr(dataset_train, 'set_epoch'):
                 dataset_train.set_epoch(epoch)
             elif args.distributed and hasattr(loader_train.sampler, 'set_epoch'):
                 loader_train.sampler.set_epoch(epoch)
-
+            print(f'Starting training, epooch:{epoch}')
             train_metrics = train_one_epoch(
                 epoch,
                 model,
