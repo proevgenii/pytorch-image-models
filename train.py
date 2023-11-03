@@ -927,7 +927,7 @@ def train_one_epoch(
                 loss = loss_fn(output, target.long())
             if accum_steps > 1:
                 loss /= accum_steps
-            return loss
+            return loss, output
 
         def _backward(_loss):
             if loss_scaler is not None:
@@ -953,10 +953,10 @@ def train_one_epoch(
 
         if has_no_sync and not need_update:
             with model.no_sync():
-                loss = _forward()
+                loss, output = _forward()
                 _backward(loss)
         else:
-            loss = _forward()
+            loss, output = _forward()
             _backward(loss)
 
         if not args.distributed:
